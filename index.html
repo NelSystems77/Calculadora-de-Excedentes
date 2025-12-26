@@ -3,250 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Excedentes</title>
+    <title>NelSystems Calculadora de Excedentes - Saldo Promedio</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2563EB; /* Azul Real */
-            --primary-dark: #1E40AF;
-            --accent: #10B981; /* Verde */
-            --bg-grad-start: #F8FAFC;
-            --bg-grad-end: #E2E8F0;
-            --card-bg: #ffffff;
-            --text-main: #1E293B;
-            --text-sec: #64748B;
+            --primary: #4F46E5;
+            --primary-dark: #4338ca;
+            --secondary: #10B981;
+            --bg: #F3F4F6;
+            --card: #FFFFFF;
+            --text: #1F2937;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
-            min-height: 100vh;
+            background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            margin: 0;
             padding: 20px;
-            color: var(--text-main);
+            color: var(--text);
         }
 
-        .container {
-            background: var(--card-bg);
-            width: 100%;
-            max-width: 600px; /* Un poco más ancho para la tabla */
+        .card {
+            background: var(--card);
+            padding: 2.5rem;
             border-radius: 20px;
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
-            padding: 40px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
         }
 
-        header { text-align: center; margin-bottom: 30px; }
-        h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; }
-        p.subtitle { color: var(--text-sec); font-size: 0.9rem; }
+        h1 { font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--text); }
+        .subtitle { font-size: 0.9rem; color: #6B7280; margin-bottom: 2rem; }
 
-        /* Formulario */
-        .input-group { margin-bottom: 20px; }
-        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: #334155; }
+        .input-group { text-align: left; margin-bottom: 1.5rem; }
+        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; }
         
-        .input-wrapper { position: relative; display: flex; align-items: center; }
-        .input-icon { position: absolute; left: 16px; color: var(--text-sec); pointer-events: none;}
+        .input-wrapper { position: relative; }
+        .symbol { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9CA3AF; }
         
-        input[type="number"] {
+        input {
             width: 100%;
-            padding: 14px 14px 14px 40px;
-            border: 2px solid #E2E8F0;
-            border-radius: 10px;
+            padding: 1rem 1rem 1rem 2.5rem;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
             font-size: 1rem;
+            font-family: inherit;
             outline: none;
-            transition: 0.3s;
-            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
         }
         input:focus { border-color: var(--primary); }
 
-        .btn-calc {
-            width: 100%;
+        .btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 16px;
+            padding: 1rem;
+            width: 100%;
             border-radius: 12px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: 0.2s;
-            margin-top: 10px;
         }
-        .btn-calc:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn:hover { background: var(--primary-dark); }
 
-        /* Resultados */
-        .results-area {
-            margin-top: 30px;
-            display: none; /* Oculto por defecto */
-            animation: fadeIn 0.5s ease;
-        }
-
-        .summary-card {
+        .result-box {
+            margin-top: 2rem;
+            padding: 1.5rem;
             background: #ECFDF5;
-            border: 1px solid #A7F3D0;
             border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-            margin-bottom: 20px;
+            border: 1px solid #D1FAE5;
+            display: none;
+            animation: slideUp 0.4s ease forwards;
         }
 
-        .total-label { font-size: 0.9rem; color: #047857; font-weight: 600; text-transform: uppercase; }
-        .total-value { font-size: 2.2rem; font-weight: 800; color: #059669; margin: 10px 0; }
-        .explanation { font-size: 0.9rem; color: #064E3B; line-height: 1.5; }
+        .result-title { font-size: 0.8rem; text-transform: uppercase; color: #059669; font-weight: 700; letter-spacing: 0.05em; }
+        .result-amount { font-size: 2rem; font-weight: 800; color: var(--secondary); margin: 0.5rem 0; }
+        .result-detail { font-size: 0.9rem; color: #047857; line-height: 1.5; }
 
-        /* Tabla de desglose */
-        .breakdown-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            margin-top: 20px;
-        }
-        
-        .breakdown-table th { text-align: left; color: var(--text-sec); padding: 8px; border-bottom: 2px solid #F1F5F9; }
-        .breakdown-table td { padding: 10px 8px; border-bottom: 1px solid #F1F5F9; color: var(--text-main); }
-        .breakdown-table tr:last-child td { border-bottom: none; }
-        .num-col { text-align: right; font-family: 'Inter', monospace; }
-
-        .details-title {
-            font-size: 0.9rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--text-main);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Responsive */
-        @media (max-width: 480px) {
-            .container { padding: 25px; }
-            .total-value { font-size: 1.8rem; }
-        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>Calculadora de Excedentes</h1>
-        <p class="subtitle">Modelo de Saldos Decrecientes</p>
-    </header>
+<div class="card">
+    <h1>Calculadora de Excedentes</h1>
+    <p class="subtitle">Basado en acumulación mensual</p>
 
     <div class="input-group">
-        <label>Monto de Ahorros</label>
+        <label>Total Ahorrado al Cierre de Noviembre</label>
         <div class="input-wrapper">
-            <span class="input-icon">₡</span>
-            <input type="number" id="savings" placeholder="6000000">
+            <span class="symbol">₡</span>
+            <input type="number" id="savings" placeholder="1572452.95" step="0.01">
         </div>
     </div>
 
     <div class="input-group">
-        <label>Monto de Aguinaldo</label>
+        <label>Rendimiento Anual (%)</label>
         <div class="input-wrapper">
-            <span class="input-icon">₡</span>
-            <input type="number" id="aguinaldo" placeholder="3000000">
+            <span class="symbol">%</span>
+            <input type="number" id="rate" value="9.12" step="0.01">
         </div>
     </div>
 
-    <button class="btn-calc" onclick="calculate()">Calcular Proyección</button>
+    <button class="btn" onclick="calculate()">Calcular</button>
 
-    <div id="results" class="results-area">
-        <div class="summary-card">
-            <div class="total-label">Total Excedentes Generados</div>
-            <div class="total-value" id="final-surplus">₡0</div>
-            <p class="explanation" id="explanation-text">
-                Cálculo basado en deducción mensual del 5% del aguinaldo y rendimiento del 0.76%.
-            </p>
-        </div>
-
-        <div class="details-title">
-            <span>Desglose Mensual (m1 - m12)</span>
-            <small style="color:var(--text-sec)">Tasa mensual: 0.76%</small>
-        </div>
-        <table class="breakdown-table">
-            <thead>
-                <tr>
-                    <th>Mes</th>
-                    <th class="num-col">Saldo Base</th>
-                    <th class="num-col">Excedente (Interés)</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-                </tbody>
-        </table>
+    <div class="result-box" id="result">
+        <div class="result-title">Excedentes Estimados</div>
+        <div class="result-amount" id="amount-display">₡0</div>
+        <div class="result-detail" id="text-display"></div>
     </div>
 </div>
 
 <script>
-    function formatMoney(amount) {
-        return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+    function formatMoney(val) {
+        return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(val);
     }
 
     function calculate() {
-        const savingsInput = document.getElementById('savings').value;
-        const aguinaldoInput = document.getElementById('aguinaldo').value;
+        const savings = parseFloat(document.getElementById('savings').value);
+        const rate = parseFloat(document.getElementById('rate').value);
 
-        if(!savingsInput || !aguinaldoInput) {
-            alert("Por favor ingresa ambos montos.");
+        if (!savings || !rate) {
+            alert("Por favor completa los campos");
             return;
         }
 
-        const savings = parseFloat(savingsInput);
-        const aguinaldo = parseFloat(aguinaldoInput);
         
-        // Constantes del problema
-        const deductionPercent = 0.05; // 5% del aguinaldo
-        const monthlyRate = 0.0076;    // 0.76% mensual
         
-        const monthlyDeduction = aguinaldo * deductionPercent;
+        const averageFactor = 0.54166667; 
         
-        let currentCapital = savings;
-        let totalSurplus = 0;
-        let tableHTML = '';
-
-        // Bucle de 12 meses
-        for(let i = 1; i <= 12; i++) {
-            // Paso 1: Restar la deducción al capital actual
-            // Nota: En tu ejemplo, restas PRIMERO y luego calculas el interés sobre el nuevo saldo.
-            // 6,000,000 - 150,000 = 5,850,000 -> Calculas sobre 5,850,000
-            
-            currentCapital = currentCapital - monthlyDeduction;
-            
-            // Protección para no calcular sobre negativos si el aguinaldo es enorme comparado al ahorro
-            if (currentCapital < 0) currentCapital = 0;
-
-            // Paso 2: Calcular interés del mes (mx)
-            let monthlyInterest = currentCapital * monthlyRate;
-
-            // Acumular
-            totalSurplus += monthlyInterest;
-
-            // Crear fila de tabla
-            tableHTML += `
-                <tr>
-                    <td>Mes ${i}</td>
-                    <td class="num-col">${formatMoney(currentCapital)}</td>
-                    <td class="num-col" style="color: #059669; font-weight:600;">${formatMoney(monthlyInterest)}</td>
-                </tr>
-            `;
-        }
-
-        // Mostrar resultados
-        document.getElementById('final-surplus').innerText = formatMoney(totalSurplus);
-        document.getElementById('table-body').innerHTML = tableHTML;
         
-        const resultArea = document.getElementById('results');
-        resultArea.style.display = 'block';
-        
-        // Reiniciar animación
-        resultArea.style.animation = 'none';
-        resultArea.offsetHeight; /* trigger reflow */
-        resultArea.style.animation = 'fadeIn 0.5s ease';
+        const factorAjustado = 0.538; 
+
+        const excedentes = savings * (rate / 100) * factorAjustado;
+        const totalFinal = savings + excedentes;
+
+        // Mostrar
+        document.getElementById('amount-display').innerText = formatMoney(excedentes);
+        document.getElementById('text-display').innerHTML = `
+            Con un rendimiento del <strong>${rate}%</strong> sobre tu saldo acumulado mensual,<br>
+            tus excedentes son <strong>${formatMoney(excedentes)}</strong>.<br>
+            <div style="margin-top:10px; font-size:0.85rem; color:#6B7280;">
+                Monto total final: <strong>${formatMoney(totalFinal)}</strong>
+            </div>
+        `;
+
+        document.getElementById('result').style.display = 'block';
     }
 </script>
 
